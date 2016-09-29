@@ -3,20 +3,23 @@
   "version": "0.1.0",
   "author": "Bitovi <info@bitovi.com>",
   "description": "Server side JavaScript FTW!",
-  "engines" : { "node" : "0.10.0" },
+  "engines": {
+    "node": "0.10.0"
+  },
   "scripts": {
-    "test": "npm run mocha",
+    "test": "npm run eslint && npm run mocha",
     "start": "node lib/main.js",
-    "mocha": "mocha test.js"
+    "mocha": "mocha test/test.js",
+    "eslint": "eslint lib/*.js test/*.js"
   },
   "main": "./lib/main.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/bitovi/node-training"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
+    "eslint": "^3.6.1",
     "mocha": "^3.1.0"
   },
   "license": "MIT"

@@ -1,3 +1,4 @@
+/* global describe it */
 const assert = require('assert');
 
 describe('my app test', function() {
