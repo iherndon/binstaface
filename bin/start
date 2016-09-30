@@ -2,6 +2,6 @@
 const binstaface = require('../lib');
 const path = require('path');
 
-binstaface(path.join(__dirname, '..')).listen(1337, function() {
+binstaface().listen(1337, function() {
   console.log(`Server listening on port 1337`);
 });

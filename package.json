@@ -18,6 +18,8 @@
     "url": "https://github.com/bitovi/node-training"
   },
   "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
     "mime": "^1.3.4"
   },
   "devDependencies": {
