@@ -9,6 +9,10 @@ describe('messages service', function() {
   const PORT = 4455;
   let server;
 
+  const req = request.defaults({
+    baseUrl: `http://localhost:${PORT}/messages`,
+    json: true
+  });
   before(function(done) {
     server = binstaface()
       .listen(PORT, () => done());
@@ -19,32 +23,32 @@ describe('messages service', function() {
   });
 
   it('should respond with messages array and 200 status code', function(done) {
-    request(`http://localhost:${PORT}/messages`, (error, res, body) => {
+    req('/', (error, res, body) => {
       if(error) {
         return done(error);
       }
 
       assert.equal(res.statusCode, 200);
-      assert.equal(body, JSON.stringify([{_id: 1, message: 'Here We Go!', sentBy: 'ivan'}]));
+      assert.deepEqual(body, [{_id: 1, message: 'Here We Go!', sentBy: 'ivan'}]);
       done();
     });
   });
 
   it('should respond with single message based on id and 200 status code', function(done) {
-    request(`http://localhost:${PORT}/messages/1`, (error, res, body) => {
+    req('/1', (error, res, body) => {
       if(error) {
         return done(error);
       }
 
       assert.equal(res.statusCode, 200);
-      assert.equal(body, JSON.stringify({_id: 1, message: 'Here We Go!', sentBy: 'ivan'}));
+      assert.deepEqual(body, {_id: 1, message: 'Here We Go!', sentBy: 'ivan'});
       done();
     });
   });
-  describe('PUT requests', function(){
-    
-    it('should properly handle a put request if the message exists with status code 200', function(done) {
-      request.put(`http://localhost:${PORT}/messages/1`).json({sentBy: 'john'})
+
+  describe('PUT requests', function(){   
+    it('should respond with status code 200 if message exists', function(done) {
+      req.put('/1').json({sentBy: 'john'})
         .on('response', function(res){
           assert.equal(res.statusCode, 200);
           done();
@@ -52,18 +56,18 @@ describe('messages service', function() {
     });
 
     it('should replace entire message object with data in put request', function(done) {
-      request(`http://localhost:${PORT}/messages/1`, (error, res, body) => {
+      req('/1', (error, res, body) => {
         if(error) {
           return done(error);
         }
 
-        assert.equal(body, JSON.stringify({_id: 1,sentBy: 'john'}));
+        assert.deepEqual(body, {_id: 1,sentBy: 'john'});
         done();
       });
     });
 
-    it('should properly handle a put request if the message does not exist with 201 status code', function(done) {
-      request.put(`http://localhost:${PORT}/messages/2`).json({sentBy: 'ivan', message: 'test message'})
+    it('should respond with status code 201 if message does not exist', function(done) {
+      req.put('/8').json({sentBy: 'ivan', message: 'test message'})
         .on('response', function(response){
           assert.equal(response.statusCode, 201);
           done();
@@ -71,12 +75,34 @@ describe('messages service', function() {
     });
 
     it('should add new message to messages array', function(done){
-      request(`http://localhost:${PORT}/messages`, (error, res, body) => {
+      req('/', (error, res, body) => {
         if(error) {
           return done(error);
         }
 
-        assert.equal(JSON.parse(body).length, 2);
+        assert.equal(body.length, 2);
+        done();
+      });
+    });
+  });
+
+  describe('POST requests', function(){
+    it('should respond with status code 201', function(done) {
+      req.post('/').json({sentBy: 'sarah', message: 'tell me about it'})
+        .on('response', function(res){
+          assert.equal(res.statusCode, 201);
+          done();
+        });
+    });
+
+    it('should create new message with correct id', function(done) {
+      req('/9', (error, res, body) => {
+        if(error) {
+          return done(error);
+        }
+
+        assert.equal(res.statusCode, 200);
+        assert.deepEqual(body, {_id: 9, sentBy: 'sarah', message: 'tell me about it'});
         done();
       });
     });
@@ -84,7 +110,7 @@ describe('messages service', function() {
 
   describe('PATCH requests', function(){
     it('should respond with a 404 if message does not exist', function(done){
-      request.patch(`http://localhost:${PORT}/messages/3`).json({sentBy: 'john'})
+      req.patch('/4').json({sentBy: 'john'})
       .on('response', function(res){
         assert.equal(res.statusCode, 404);
         done();
@@ -92,7 +118,7 @@ describe('messages service', function() {
     });
 
     it('should handle patch request appropriately with status code 200 if message exists', function(done){
-      request.patch(`http://localhost:${PORT}/messages/2`).json({sentBy: 'john'})
+      req.patch('/8').json({sentBy: 'john'})
         .on('response', function(res){
           assert.equal(res.statusCode, 200);
           done();
@@ -100,12 +126,12 @@ describe('messages service', function() {
     });
 
     it('should only change fields sent in put request', function(done){
-      request(`http://localhost:${PORT}/messages/2`, (error, res, body) => {
+      req('/8', (error, res, body) => {
         if(error) {
           return done(error);
         }
 
-        assert.equal(body, JSON.stringify({_id:2,'sentBy':'john','message':'test message'}));
+        assert.deepEqual(body, {_id:8,'sentBy':'john','message':'test message'});
         done();
       });
     });
